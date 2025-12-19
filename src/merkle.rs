@@ -44,6 +44,7 @@ impl MerkleTree {
         self.levels.last().unwrap()[0]
     }
 
+    /// Generate a Merkle inclusion proof for a leaf index
     pub fn prove(&self, mut index: usize) -> Vec<[u8; 32]> {
         let mut proof = Vec::new();
 
@@ -63,24 +64,25 @@ impl MerkleTree {
 
         proof
     }
-}
 
-pub fn verify_proof(
-    leaf: [u8; 32],
-    proof: &[[u8; 32]],
-    root: [u8; 32],
-    mut index: usize,
-) -> bool {
-    let mut hash = leaf;
+    /// Verify a Merkle inclusion proof for a leaf index
+    pub fn verify(
+        leaf: [u8; 32],
+        proof: &[[u8; 32]],
+        root: [u8; 32],
+        mut index: usize,
+    ) -> bool {
+        let mut hash = leaf;
 
-    for sibling in proof {
-        hash = if index % 2 == 0 {
-            hash_pair(&hash, sibling)
-        } else {
-            hash_pair(sibling, &hash)
-        };
-        index /= 2;
+        for sibling in proof {
+            hash = if index % 2 == 0 {
+                hash_pair(&hash, sibling)
+            } else {
+                hash_pair(sibling, &hash)
+            };
+            index /= 2;
+        }
+
+        hash == root
     }
-
-    hash == root
 }

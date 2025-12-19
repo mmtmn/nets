@@ -23,6 +23,18 @@ pub struct MatchTrace {
     pub merkle: MerkleTree,
 }
 
+impl MatchTrace {
+    /// Return the hash of the step at a given index
+    pub fn step_hash(&self, index: usize) -> [u8; 32] {
+        self.steps[index].hash()
+    }
+
+    /// Return the Merkle proof for a given step index
+    pub fn step_proof(&self, index: usize) -> Vec<[u8; 32]> {
+        self.merkle.prove(index)
+    }
+}
+
 pub fn run_match_with_trace<S, A>(
     mut system: S,
     agent: &mut A,

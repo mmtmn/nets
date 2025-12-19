@@ -25,3 +25,5 @@ pub mod chain_adapter;
 pub mod mock_chain;
 pub mod onchain_settlement;
 pub mod onchain_commit;
+
+pub mod fraud;
