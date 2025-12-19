@@ -1,89 +1,202 @@
 # nets
 
-**nets** is a decentralized market where neural networks compete instead of cooperating.
+**nets** is a deterministic, competitive protocol where autonomous agents compete on verifiable tasks under selection pressure.
 
-There is no shared training, no global gradients, and no pretending blockchains can do backprop. Each participant runs their own model locally and submits it to open competitions. Rewards flow purely from measurable performance.
+There is:
 
-The blockchain is used only for coordination, incentives, and settlement.
+* no shared training
+* no global model
+* no gradient exchange
+* no cooperative learning
+
+Agents compete. Results are replayed. Capital flows to winners. Losers lose stake or disappear.
+
+Blockchains are used **only** for commitment, settlement, and enforcement.
+All execution happens off chain.
+
+---
 
 ## Core Idea
 
-Intelligence emerges from selection pressure, not synchronization.
+Intelligence scales through **selection**, not synchronization.
 
-Models compete on externally verifiable tasks. Winners earn capital. Capital buys more compute, more entries, or higher tier competitions. Losers fade out. Evolution replaces training loops.
+Agents that perform well earn capital.
+Capital controls access to harder leagues and more evaluation capacity.
+Poor agents lose capital or are disqualified.
 
-## How It Works
+There is no coordination between agents. Evolution replaces training loops.
 
-1. **Tasks**
+---
 
-   * Deterministic, cheap to verify environments
-   * Examples: Snake, Chess, board games, simulations, prediction tasks
+## What Exists (v0)
 
-2. **Participants**
+nets is not a concept. The following is implemented and working:
 
-   * Anyone can run a node
-   * Nodes self host models or deterministic agents
-   * No code or weights are shared by default
+* Deterministic task environments
+* Untrusted WASM agents
+* Sandbox execution with fuel limits
+* Replay verification
+* Merkle-committed execution traces
+* Multi-match leagues
+* Stake slashing on replay mismatch
+* Persistent balances and disqualification state
+* On-chain commitment interface (adapter-based)
 
-3. **Competition**
+---
 
-   * Models are matched in tournaments or leagues
-   * Matches are run off chain
-   * Scores or match proofs are posted on chain
+## Architecture Overview
 
-4. **Settlement**
+### Systems
 
-   * The chain verifies results
-   * Rewards are distributed based on performance
-   * Stake slashing applies to fraud or invalid submissions
+A **System** defines a deterministic task.
 
-5. **Evolution**
+Requirements:
 
-   * Earnings can be used to:
+* deterministic execution
+* cheap replay
+* finite termination
+* explicit scoring
 
-     * Buy more evaluation slots
-     * Enter harder leagues
-     * Fund retraining or new variants
-   * No coordination required between models
+Example systems:
+
+* Snake (implemented)
+* Board games
+* Deterministic simulations
+* Prediction tasks
+
+---
+
+### Agents
+
+An **Agent** is a black-box decision function.
+
+In nets-core:
+
+* Agents are submitted as WASM binaries
+* No filesystem, networking, or randomness
+* Fixed fuel budget
+* Single required export:
+
+```c
+extern "C" fn decide(input: u64) -> u64
+```
+
+Agents may be adversarial. The system does not trust them.
+
+---
+
+### Matches
+
+A **Match** consists of:
+
+* one system
+* one agent
+* deterministic execution from reset to termination
+
+The output is a `(agent_id, score)` pair.
+
+All matches are replayable.
+
+---
+
+### Verification & Slashing
+
+Every match can be recomputed independently.
+
+If recomputed score ≠ claimed score:
+
+* stake is slashed
+* agent is immediately disqualified
+* remaining matches are skipped
+
+There is no partial trust and no tolerance for mismatch.
+
+---
+
+### Traces & Commitments
+
+During execution, a trace is recorded:
+
+* hash(observation)
+* hash(action)
+* step index
+
+Trace steps are aggregated into a Merkle tree.
+
+Only the Merkle root is posted on chain.
+Any step can be proven via inclusion proof.
+
+---
+
+### Leagues
+
+Agents compete in **leagues**.
+
+Each league defines:
+
+* minimum stake requirement
+* reward multiplier
+* number of matches per round
+
+Leagues run multiple matches per agent to reward consistency, not luck.
+
+Capital determines which leagues an agent may enter.
+
+---
+
+### Settlement
+
+After a league round:
+
+* agents are ranked by total score
+* rewards are distributed deterministically
+* balances are updated
+* balances persist across restarts
+
+Capital controls future opportunity.
+
+---
 
 ## Why This Exists
 
-Blockchains are bad at training neural networks. They are slow, adversarial, and expensive.
+Blockchains are bad at:
+
+* training models
+* running simulations
+* low-latency execution
 
 They are good at:
 
-* Enforcing rules
-* Settling markets
-* Rewarding outcomes
-* Coordinating strangers who do not trust each other
+* enforcing rules
+* anchoring commitments
+* settling outcomes
+* coordinating adversaries
 
-nets only uses blockchains for what they are good at.
+nets uses blockchains **only** where they add value.
 
-## Initial Focus
+---
 
-* Simple environments first (Snake)
-* Deterministic execution
-* Transparent scoring
-* Clear incentives
+## Non-Goals
 
-Complex domains like Chess come later, once the market mechanics are proven.
+nets explicitly does **not** support:
 
-## Non Goals
+* on-chain training
+* shared models
+* federated learning
+* gradient aggregation
+* cooperative intelligence
+* low-latency inference
 
-* On chain training
-* Shared gradients
-* Global models
-* Low latency inference
-* Cooperative learning protocols
+If your system requires fast synchronization, nets is the wrong tool.
 
-If your idea requires fast synchronization, nets is the wrong system.
+---
 
 ## Philosophy
 
-nets treats intelligence as a competitive market, not a collective brain.
+nets treats intelligence as a **competitive market**, not a collective brain.
 
-If a model is good, it wins.
+If an agent is good, it wins.
 If it wins, it earns.
 If it earns, it scales.
 
-That’s it.
+Everything else is implementation detail.

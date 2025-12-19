@@ -1,0 +1,30 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# Cargo
+Cargo.lock
+**/Cargo.lock
+
+# WASM build artifacts
+**/target/wasm32-unknown-unknown/
+**/*.wasm
+
+# Runtime state
+state.json
+
+# Local agents (compiled submissions)
+agents/agent_*.wasm
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
