@@ -129,8 +129,8 @@ fn main() {
         ledger.credit(&agent.id(), 100);
     }
 
-    persist::save("state.json", &ledger, &league_state);
-
+    persist::save("state.json", &ledger, &league_state, Vec::new());
+    
     println!("\nfinal balances:");
     for agent in ["agent_A", "agent_B"] {
         println!(
