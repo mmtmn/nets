@@ -14,6 +14,7 @@ pub mod league;
 pub mod eligibility;
 pub mod settlement;
 pub mod tournament;
+pub mod league_runner;
 
 pub mod slashing;
 pub mod league_state;

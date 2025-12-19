@@ -11,6 +11,7 @@ pub struct LeagueConfig {
     pub matches_per_agent: usize,
 }
 
+#[derive(Clone)]
 pub struct LeagueResult<S: System> {
     pub agent_id: String,
     pub total_score: i64,
@@ -26,6 +27,7 @@ pub fn run_league<S, A>(
 ) -> Vec<LeagueResult<S>>
 where
     S: System + Clone,
+    S::Score: Into<i64>,
     A: Agent<S::Observation, S::Action>,
 {
     let mut results = Vec::new();
@@ -36,11 +38,11 @@ where
         }
 
         let mut matches = Vec::new();
-        let mut total = 0i64;
+        let mut total: i64 = 0;
 
         for _ in 0..cfg.matches_per_agent {
             let r = run_match(system.clone(), agent);
-            total += r.score as i64;
+            total += r.score.into();
             matches.push(r);
         }
 
