@@ -6,6 +6,7 @@ pub mod ledger;
 pub mod evolution;
 pub mod wasm_agent;
 pub mod snake;
+pub mod chess;
 pub mod trace;
 pub mod merkle;
 pub mod match_trace;
